@@ -11,6 +11,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <iostream>
+
 #include <random>
 
 GLuint phonebank_meshes_for_lit_color_texture_program = 0;
@@ -147,12 +149,16 @@ void PlayMode::update(float elapsed) {
 		if (down.pressed && !up.pressed) move.y =-1.0f;
 		if (!down.pressed && up.pressed) move.y = 1.0f;
 
+//		std::cout << "in update" << std::endl;
+		
 		//make it so that moving diagonally doesn't go faster:
 		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
-
+		
 		//get move in world coordinate system:
 		glm::vec3 remain = player.transform->make_local_to_world() * glm::vec4(move.x, move.y, 0.0f, 0.0f);
 
+//		std::cout << "after move" << std::endl;
+		
 		//using a for() instead of a while() here so that if walkpoint gets stuck in
 		// some awkward case, code will not infinite loop:
 		for (uint32_t iter = 0; iter < 10; ++iter) {
