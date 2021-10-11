@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Rally Race
 
-Author: (TODO: your name)
+Author: Wenxuan Ou
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: A simple race game with terrain.
 
 Screen Shot:
 
@@ -10,7 +10,7 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+WASD to drive.
 
 Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
 
