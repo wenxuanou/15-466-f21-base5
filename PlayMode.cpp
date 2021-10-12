@@ -11,7 +11,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <iostream>
+#include <iostream>			// for debug
+#include <glm/gtx/string_cast.hpp>
 
 #include <random>
 
@@ -148,16 +149,12 @@ void PlayMode::update(float elapsed) {
 		if (!left.pressed && right.pressed) move.x = 1.0f;
 		if (down.pressed && !up.pressed) move.y =-1.0f;
 		if (!down.pressed && up.pressed) move.y = 1.0f;
-
-//		std::cout << "in update" << std::endl;
 		
 		//make it so that moving diagonally doesn't go faster:
 		if (move != glm::vec2(0.0f)) move = glm::normalize(move) * PlayerSpeed * elapsed;
 		
 		//get move in world coordinate system:
 		glm::vec3 remain = player.transform->make_local_to_world() * glm::vec4(move.x, move.y, 0.0f, 0.0f);
-
-//		std::cout << "after move" << std::endl;
 		
 		//using a for() instead of a while() here so that if walkpoint gets stuck in
 		// some awkward case, code will not infinite loop:
@@ -167,6 +164,12 @@ void PlayMode::update(float elapsed) {
 			float time;
 			walkmesh->walk_in_triangle(player.at, remain, &end, &time);
 			player.at = end;
+			
+			std::cout << "after walk" << std::endl;
+			assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->normals.size() );
+			assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->normals.size() );
+			assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->normals.size() );
+			
 			if (time == 1.0f) {
 				//finished within triangle:
 				remain = glm::vec3(0.0f);
@@ -174,6 +177,7 @@ void PlayMode::update(float elapsed) {
 			}
 			//some step remains:
 			remain *= (1.0f - time);
+			
 			//try to step over edge:
 			glm::quat rotation;
 			if (walkmesh->cross_edge(player.at, &end, &rotation)) {
@@ -200,15 +204,33 @@ void PlayMode::update(float elapsed) {
 					remain += 0.01f * d * in;
 				}
 			}
+			
+			std::cout << "after cross edge" << std::endl;
+			assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->normals.size() );
+			assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->normals.size() );
+			assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->normals.size() );
+			
+			
 		}
-
+		
 		if (remain != glm::vec3(0.0f)) {
 			std::cout << "NOTE: code used full iteration budget for walking." << std::endl;
 		}
-
+		
+//		std::cout << "player indices: ";
+//		std::cout << glm::to_string(player.at.indices) << std::endl;
+//		std::cout << "walkmesh indices: ";
+//		std::cout << glm::to_string(player.at.indices) << std::endl;
+		
+		std::cout << "before update position" << std::endl;
+		assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->normals.size() );
+		assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->normals.size() );
+		assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->normals.size() );
+		
 		//update player's position to respect walking:
 		player.transform->position = walkmesh->to_world_point(player.at);
 
+		
 		{ //update player's rotation to respect local (smooth) up-vector:
 			
 			glm::quat adjust = glm::rotation(
