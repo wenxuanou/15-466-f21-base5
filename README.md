@@ -6,7 +6,7 @@ Design: A simple race game with terrain.
 
 Screen Shot:
 
-![Screen Shot](screenshot.png)
+![Screen Shot](gameplay.png)
 
 How To Play:
 
