@@ -164,30 +164,16 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 	if(move.x < 0.0f){
 		time = - start.weights.x / step_bary.x;
 		move = start.weights + step_bary * time;
-		move.x = 0.0f;
 		//shift index
-//		unsigned int tempId = end.indices.z;
-//		end.indices.z = end.indices.y;
-//		end.indices.y = end.indices.x;
-//		end.indices.x = tempId;
-//
-//		move.x = move.y;
-//		move.y = move.x;
-//		move.z = 0.0f;
+		end.indices = glm::vec3(start.indices.y, start.indices.z, start.indices.x);
+		move = glm::vec3(move.y, move.z, 0.0f);
 		
 	}else if(move.y < 0.0f){
 		time = - start.weights.y / step_bary.y;
 		move = start.weights + step_bary * time;
-		move.y = 0.0f;
 		//shift index
-//		unsigned int tempId = end.indices.z;
-//		end.indices.z = end.indices.x;
-//		end.indices.x = end.indices.y;
-//		end.indices.y = tempId;
-//
-//		move.x = move.z;
-//		move.y = move.x;
-//		move.z = 0.0f;
+		end.indices = glm::vec3(start.indices.z, start.indices.x, start.indices.y);
+		move = glm::vec3(move.z, move.x, 0.0f);
 		
 	}else if(move.z < 0.0f){
 		time = - start.weights.z / step_bary.z;
@@ -218,6 +204,7 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 
 	assert(start.weights.z == 0.0f); //*must* be on an edge.
 	auto next_edge = next_vertex.find( glm::uvec2(start.indices.x, start.indices.y) );
+
 	
 	//check if 'edge' is a non-boundary edge:
 	if (next_edge != next_vertex.end()) {
@@ -244,6 +231,8 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 		rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 		return false;
 	}
+
+	return false;
 }
 
 
