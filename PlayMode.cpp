@@ -158,22 +158,17 @@ void PlayMode::update(float elapsed) {
 		
 		//using a for() instead of a while() here so that if walkpoint gets stuck in
 		// some awkward case, code will not infinite loop:
+
 		for (uint32_t iter = 0; iter < 10; ++iter) {
 			if (remain == glm::vec3(0.0f)) break;
 			WalkPoint end;
 			float time;
+
 			walkmesh->walk_in_triangle(player.at, remain, &end, &time);
 			player.at = end;
 
-			std::cout << "after walk" << std::endl;
-			assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->normals.size() );
-			assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->normals.size() );
-			assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->normals.size() );
-			
-
 			if (time == 1.0f) {
 				//finished within triangle:
-				remain = glm::vec3(0.0f);
 				break;
 			}
 			//some step remains:
@@ -205,36 +200,12 @@ void PlayMode::update(float elapsed) {
 					remain += 0.01f * d * in;
 				}
 			}
-
-			/*
-			std::cout << "after cross edge" << std::endl;
-			std::cout << "player indices: ";
-			std::cout << glm::to_string(player.at.indices) << std::endl;
-			std::cout << "walkmesh indices: ";
-			std::cout << glm::to_string(player.at.indices) << std::endl;
-			
-			assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->vertices.size() );
-			assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->vertices.size() );
-			assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->vertices.size() );
-			*/
 			
 		}
 		
 		if (remain != glm::vec3(0.0f)) {
 			std::cout << "NOTE: code used full iteration budget for walking." << std::endl;
 		}
-
-		/*
-		std::cout << "player indices: ";
-		std::cout << glm::to_string(player.at.indices) << std::endl;
-		std::cout << "walkmesh indices: ";
-		std::cout << glm::to_string(player.at.indices) << std::endl;
-		*/
-
-		std::cout << "before update position" << std::endl;
-		assert( player.at.indices.x >= 0 && player.at.indices.x < walkmesh->vertices.size() );
-		assert( player.at.indices.y >= 0 && player.at.indices.y < walkmesh->vertices.size() );
-		assert( player.at.indices.z >= 0 && player.at.indices.z < walkmesh->vertices.size() );
 		
 		//update player's position to respect walking:
 		player.transform->position = walkmesh->to_world_point(player.at);
