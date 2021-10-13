@@ -164,10 +164,10 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 	end.indices = start.indices;
 	end.weights = start.weights;
 	
-	std::cout << "end indices before walk: ";
-	std::cout << glm::to_string(end.indices) << std::endl;
-	std::cout << "start weights before walk: ";
-	std::cout << glm::to_string(end.weights) << std::endl;
+//	std::cout << "end indices before walk: ";
+//	std::cout << glm::to_string(end.indices) << std::endl;
+//	std::cout << "start weights before walk: ";
+//	std::cout << glm::to_string(end.weights) << std::endl;
 
 	if(move.x < 0.0f){
 		minTime = - start.weights.x / step_bary.x;
@@ -192,11 +192,11 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 	time = minTime;
 	end.weights = move;
 
-	std::cout << "end indices after walk: ";
-	std::cout << glm::to_string(end.indices) << std::endl;
-	std::cout << "end weights after walk: ";
-	std::cout << glm::to_string(end.weights) << std::endl;
-	std::cout << "time: " << time << std::endl;
+//	std::cout << "end indices after walk: ";
+//	std::cout << glm::to_string(end.indices) << std::endl;
+//	std::cout << "end weights after walk: ";
+//	std::cout << glm::to_string(end.weights) << std::endl;
+//	std::cout << "time: " << time << std::endl;
 
 	//figure out which edge (if any) is crossed first.
 	// set time and end appropriately.
@@ -223,10 +223,22 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 	//check if 'edge' is a non-boundary edge:
 	if (next_edge != next_vertex.end()) {
 
+		std::cout << "end indices before cross: ";
+		std::cout << glm::to_string(end.indices) << std::endl;
+		std::cout << "end weights before cross: ";
+		std::cout << glm::to_string(end.weights) << std::endl;
+		
 		//make 'end' represent the same (world) point, but on triangle (edge.y, edge.x, [other point]):
 		//TODO
 		end.indices = glm::vec3(start.indices.y, start.indices.x, next_edge->second);
-		end.weights = glm::vec3(start.weights.y, start.weights.x, 0);	//on the edge, z still 0
+		end.weights = glm::vec3(start.weights.y, start.weights.x, 0.0f);	//on the edge, z still 0
+	
+		
+		std::cout << "end indices after cross: ";
+		std::cout << glm::to_string(end.indices) << std::endl;
+		std::cout << "end weights after cross: ";
+		std::cout << glm::to_string(end.weights) << std::endl;
+		
 		
 		//make 'rotation' the rotation that takes (start.indices)'s normal to (end.indices)'s normal:
 		//TODO
@@ -237,8 +249,10 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 		
 		glm::vec3 start_norm = normalize(cross(c - b, a - b));
 		glm::vec3 end_norm = normalize(cross(d - b, c - b));
-		rotation = glm::normalize(glm::rotation(start_norm, end_norm));	//wxyz
-
+		rotation = glm::rotation(start_norm, end_norm);	//wxyz
+		
+//		assert(glm::dot(start_norm, end_norm) >= 0.0f);
+		
 		return true;
 	} else {
 		end = start;
