@@ -170,21 +170,21 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 	std::cout << glm::to_string(end.weights) << std::endl;
 
 	if(move.x < 0.0f){
-		time = - start.weights.x / step_bary.x;
+		minTime = - start.weights.x / step_bary.x;
 		move = start.weights + step_bary * time;
 		//shift index
 		end.indices = glm::vec3(start.indices.y, start.indices.z, start.indices.x);
 		move = glm::vec3(move.y, move.z, 0.0f);
 		
 	}else if(move.y < 0.0f){
-		time = - start.weights.y / step_bary.y;
+		minTime = - start.weights.y / step_bary.y;
 		move = start.weights + step_bary * time;
 		//shift index
 		end.indices = glm::vec3(start.indices.z, start.indices.x, start.indices.y);
 		move = glm::vec3(move.z, move.x, 0.0f);
 		
 	}else if(move.z < 0.0f){
-		time = - start.weights.z / step_bary.z;
+		minTime = - start.weights.z / step_bary.z;
 		move = start.weights + step_bary * time;
 		move.z = 0.0f;
 	}
@@ -196,6 +196,7 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 	std::cout << glm::to_string(end.indices) << std::endl;
 	std::cout << "end weights after walk: ";
 	std::cout << glm::to_string(end.weights) << std::endl;
+	std::cout << "time: " << time << std::endl;
 
 	//figure out which edge (if any) is crossed first.
 	// set time and end appropriately.
