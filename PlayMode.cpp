@@ -164,6 +164,11 @@ void PlayMode::update(float elapsed) {
 			WalkPoint end;
 			float time;
 
+			if(player.at.weights.x < 0.0f || player.at.weights.y < 0.0f || player.at.weights.z < 0.0f){
+				std::cout << "weight is negative!" << glm::to_string(player.at.weights) << std::endl;
+			}
+			
+			
 			walkmesh->walk_in_triangle(player.at, remain, &end, &time);
 			player.at = end;
 

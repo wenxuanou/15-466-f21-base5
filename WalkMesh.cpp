@@ -140,26 +140,24 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 		glm::vec3 const &c = vertices[start.indices.z];
 
 		//TODO: transform 'step' into a barycentric velocity on (a,b,c)
-		glm::vec3 unitNorm = glm::normalize( glm::cross((b - a), (c - a)) );
 		//project step on triangle plane, assume step and normal at the same side of triangle
-		glm::vec3 step_proj = step - unitNorm;
-		
 		
 		//can use cross product to rotate 90 degree
 		glm::vec3 scaleA = (a-b) - glm::dot(a-b, glm::normalize(c-b)) * glm::normalize(c-b);
 		glm::vec3 scaleB = (b-a) - glm::dot(b-a, glm::normalize(c-a)) * glm::normalize(c-a);
 		glm::vec3 scaleC = (c-a) - glm::dot(c-a, glm::normalize(b-a)) * glm::normalize(b-a);
 		
-		float stepA = glm::dot(step_proj, glm::normalize(scaleA)) / glm::length(scaleA);
-		float stepB = glm::dot(step_proj, glm::normalize(scaleB)) / glm::length(scaleB);
-		float stepC = glm::dot(step_proj, glm::normalize(scaleC)) / glm::length(scaleC);
+		float stepA = glm::dot(step, glm::normalize(scaleA)) / glm::length(scaleA);
+		float stepB = glm::dot(step, glm::normalize(scaleB)) / glm::length(scaleB);
+		float stepC = glm::dot(step, glm::normalize(scaleC)) / glm::length(scaleC);
 		
 		step_bary = glm::vec3(stepA, stepB, stepC);
 	}
 	
 	//if no edge is crossed, event will just be taking the whole step:
 	float minTime = 1.0f;
-
+	char xyz = ' ';
+	
 	glm::vec3 move = start.weights + step_bary * minTime;
 	end.indices = start.indices;
 	end.weights = start.weights;
@@ -170,24 +168,51 @@ void WalkMesh::walk_in_triangle(WalkPoint const &start, glm::vec3 const &step, W
 //	std::cout << glm::to_string(end.weights) << std::endl;
 
 	if(move.x < 0.0f){
-		minTime = - start.weights.x / step_bary.x;
-		move = start.weights + step_bary * time;
-		//shift index
-		end.indices = glm::vec3(start.indices.y, start.indices.z, start.indices.x);
-		move = glm::vec3(move.y, move.z, 0.0f);
-		
-	}else if(move.y < 0.0f){
-		minTime = - start.weights.y / step_bary.y;
-		move = start.weights + step_bary * time;
-		//shift index
-		end.indices = glm::vec3(start.indices.z, start.indices.x, start.indices.y);
-		move = glm::vec3(move.z, move.x, 0.0f);
-		
-	}else if(move.z < 0.0f){
-		minTime = - start.weights.z / step_bary.z;
-		move = start.weights + step_bary * time;
-		move.z = 0.0f;
+		float time = - start.weights.x / step_bary.x;
+		if(time < minTime){
+			minTime = time;
+			xyz = 'x';
+		}
 	}
+	
+	if(move.y < 0.0f){
+		float time = - start.weights.y / step_bary.y;
+		if(time < minTime){
+			minTime = time;
+			xyz = 'y';
+		}
+	}
+	
+	if(move.z < 0.0f){
+		float time = - start.weights.z / step_bary.z;
+		if(time < minTime){
+			minTime = time;
+			xyz = 'z';
+		}
+	}
+	
+	move = start.weights + step_bary * minTime;
+
+	switch(xyz){
+		case 'x':
+			//shift index
+			end.indices = glm::vec3(start.indices.y, start.indices.z, start.indices.x);
+			move = glm::vec3(move.y, move.z, 0.0f);
+			break;
+		case 'y':
+			//shift index
+			end.indices = glm::vec3(start.indices.z, start.indices.x, start.indices.y);
+			move = glm::vec3(move.z, move.x, 0.0f);
+			break;
+		case 'z':
+			//shift index
+			end.indices = glm::vec3(start.indices.x, start.indices.y, start.indices.z);
+			move = glm::vec3(move.x, move.y, 0.0f);
+			break;
+		default:
+			break;
+	}
+	
 	
 	time = minTime;
 	end.weights = move;
@@ -223,10 +248,10 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 	//check if 'edge' is a non-boundary edge:
 	if (next_edge != next_vertex.end()) {
 
-		std::cout << "end indices before cross: ";
-		std::cout << glm::to_string(end.indices) << std::endl;
-		std::cout << "end weights before cross: ";
-		std::cout << glm::to_string(end.weights) << std::endl;
+//		std::cout << "end indices before cross: ";
+//		std::cout << glm::to_string(end.indices) << std::endl;
+//		std::cout << "end weights before cross: ";
+//		std::cout << glm::to_string(end.weights) << std::endl;
 		
 		//make 'end' represent the same (world) point, but on triangle (edge.y, edge.x, [other point]):
 		//TODO
@@ -234,10 +259,10 @@ bool WalkMesh::cross_edge(WalkPoint const &start, WalkPoint *end_, glm::quat *ro
 		end.weights = glm::vec3(start.weights.y, start.weights.x, 0.0f);	//on the edge, z still 0
 	
 		
-		std::cout << "end indices after cross: ";
-		std::cout << glm::to_string(end.indices) << std::endl;
-		std::cout << "end weights after cross: ";
-		std::cout << glm::to_string(end.weights) << std::endl;
+//		std::cout << "end indices after cross: ";
+//		std::cout << glm::to_string(end.indices) << std::endl;
+//		std::cout << "end weights after cross: ";
+//		std::cout << glm::to_string(end.weights) << std::endl;
 		
 		
 		//make 'rotation' the rotation that takes (start.indices)'s normal to (end.indices)'s normal:
